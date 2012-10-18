@@ -33,12 +33,11 @@
       if ( !incompatible[ name ] ) {
         //everything is fine. proceed as normal
         newDefinition = definition;
-        return;
+      } else {
+        newDefinition = function (options) {
+          return getFallback(this, name, options);
+        };
       }
-
-      newDefinition = function (options) {
-        return getFallback(this, name, options);
-      };
     } else if ( typeof definition !== "function" ) {
       //This plugin knows no incompatible, so ignore and proceed as normal
       newDefinition = definition;
@@ -112,8 +111,8 @@
     count = 0;
 
     failure = Popcorn.incompatible( hook );
-    if ( failure ) {
-      return failure;
+    if ( failure || hook ) {
+      return failure || false;
     }
 
     //test plugins
