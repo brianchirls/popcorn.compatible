@@ -1,0 +1,92 @@
+<html>
+	<head>
+		<title>popcorn.compatible Simple Example</title>
+	</head>
+	<body>
+		<video id="video"
+			controls>
+			<source id="mp4"
+				src="http://videos.mozilla.org/serv/webmademovies/wtfpopcorn.mp4"
+				type='video/mp4; codecs="avc1, mp4a"'>
+			<source id="webm"
+				src="http://videos.mozilla.org/serv/webmademovies/wtfpopcorn.mp4"
+				type='video/webm; codecs="vp8, vorbis"'>
+			<source id="ogv"
+				src="http://videos.mozilla.org/serv/webmademovies/wtfpopcorn.ogv"
+				type='video/ogg; codecs="theora, vorbis"'>
+			<p>Your user agent does not support the HTML5 Video element.</p>
+		</video>
+		<div id="messages" style="white-space: pre;"></div>
+		<script type="text/javascript" src="../lib/popcorn.js"></script><!-- always load this first -->
+		<script type="text/javascript" src="../popcorn.compatible.js"></script>
+		<script type="text/javascript">
+
+		(function() {
+			function log(msg) {
+				var m = document.getElementById('messages'),
+					div = document.createElement('div');
+
+				div.appendChild(document.createTextNode(msg));
+				m.appendChild(div);
+			}
+
+			var myfallback = {
+				start: function(event, options) {
+					log('incompatible plugin started at ' + options.start);
+				},
+				end: function(event, options) {
+					log('incompatible plugin ended at ' + options.end);
+				}
+			};
+
+			Popcorn.plugin('happy', {
+				start: function(event, options) {
+					log('Everything is fine at ' + options.start + '!');
+				},
+				end: function(event, options) {
+				},
+				incompatible: function() {
+					//this plugins is always compatible
+					return false;
+				}
+			});
+Popcorn.plugin.debug = true;
+			Popcorn.plugin('sad', function() {
+				return {
+					start: function(event, options) {
+						log('This should never happen!');
+					},
+					end: function(event, options) {
+					}
+				};
+			}, {
+				/*
+				This plugin doesn't provide a definition until the event is created.
+				So we can put the incompatible function in the manifest
+				*/
+				incompatible: function() {
+					return "this plugins is never compatible";
+				}
+
+			});
+
+			Popcorn.fallback(myfallback);
+
+			var popcorn = Popcorn('#video');
+
+			popcorn.happy({
+				start: 0,
+				end: 1
+			});
+
+			popcorn.sad({
+				start: 0,
+				end: 1
+			});
+
+			log('popcorn.incompatible():\n' + JSON.stringify(popcorn.incompatible(), null, 4));
+		}());
+
+		</script>
+	</body>
+</html>
